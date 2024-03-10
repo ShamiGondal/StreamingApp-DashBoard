@@ -22,13 +22,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
 <html lang="en">
+      <>
       <body className={inter.className}>
       <Header></Header>
         <main className="relative z-10">
-          {children}
-           
+          {children} 
         </main>
         </body>
+      </>
     </html>
     </ClerkProvider>
     

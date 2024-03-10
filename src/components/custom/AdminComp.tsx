@@ -6,7 +6,9 @@ export default function AdminDashboard() {
   const { sessionClaims } = auth();
  
   if (sessionClaims?.metadata.role !== "admin") {
+    
     redirect("/");
+   
   }
  
   return (
