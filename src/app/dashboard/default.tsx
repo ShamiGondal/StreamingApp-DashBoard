@@ -3,7 +3,7 @@
 const DashBoardFooterPage = () => {
    
   return (
-    <div>
+    <div className="bg-red-200">
      DashBoard Footer
     </div>
   )

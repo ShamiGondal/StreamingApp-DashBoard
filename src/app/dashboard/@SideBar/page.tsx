@@ -8,10 +8,10 @@ import Link from 'next/link'
 const sideBarsArr = [
     {id:1,tab:'Dash',link:"/dashboard/Dash"},
     {id:2,tab:'Games',link:"/dashboard/Game"},
-    {id:3 ,tab:'Players',link:"/dashboard/Player"},
+   
     {id:4,tab:"Users",link:"/dashboard/User"},
     {id:5,tab:'Admin',link:"/dashboard/Adm"},
-    {id:6,tab:'Leagues',link:"/dashboard/League"},
+    {id:6,tab:'Leagues',link:"/dashboard/Leagues"},
 ]
 
 export default function SideBar() {
