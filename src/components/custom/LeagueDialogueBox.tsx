@@ -2,6 +2,10 @@
 
 import { Button } from "@/components/ui/button"
 import supabase from "@/config/dbConnection"
+import { useMutation } from "@tanstack/react-query"
+import { useToast } from "@/components/ui/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
+
 
 import {
   Dialog,
@@ -11,21 +15,57 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+ 
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 
-
-import { ChangeEvent, useState,useEffect } from "react"
+import { ChangeEvent, useState,useEffect, useRef, MutableRefObject } from "react"
 
 
 export function LeagueDialogBox() {
     const [name,setName] = useState("");
+    const client = useQueryClient();
     const [loading,setLoading] = useState(false);
     const [logo,setLogo] = useState<File>(null!);
+    const file = useRef<HTMLInputElement>(null!);
     const [imgUrl, setImgUrl] = useState("");
-    console.log(imgUrl);
+
+    const { toast } = useToast()
+    
+   const postLeague = async(data:{name:string,imgUrl:string})=>{
+      try{
+        setLoading(true);
+          const res=await fetch('/api/auth/leagues',{
+          method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data)
+         })
+         if(res.ok){
+          const data = await res.json();
+          toast({
+            description: data.message,
+          })
+          setName("")
+          setImgUrl("")
+          file.current.value =""
+          client.invalidateQueries({ queryKey: ["GET_LEAGUES"] })
+
+         }
+      }catch(e){
+        toast({
+          description: (e as Error).message,
+        })
+       console.error(e);
+      }
+      finally{
+        setLoading(false);
+      }
+   }
+
     const uploadImg = async()=>{
        try{
         setLoading(true)
@@ -53,17 +93,38 @@ export function LeagueDialogBox() {
       }
     },[logo])
     
-
-
+      const {mutate,isError,error} =  useMutation({
+        mutationFn:postLeague
+       })
+          
     const handleInputChange = (e:ChangeEvent<HTMLInputElement>)=>{
       if(e.target.files && e.target.files[0].size < (1024 * 1024)){
         setLogo(e.target.files[0]);
       }
     }
+    const handleClick = (e:any)=>{
+      e.preventDefault();
+      if(!name || !imgUrl){
+        return
+      }
+      const data = {name,imgUrl};
+      try{
+        mutate(data);
+      }
+      catch(e){
+   
+      }
+      
+    }
+
+    if(isError){
+      return <p>{error.message}</p>
+    }
     
     
   return (
-    <Dialog>
+    <form >
+    <Dialog >
       <DialogTrigger asChild>
         <Button variant="outline">Add League</Button>
       </DialogTrigger>
@@ -94,20 +155,22 @@ export function LeagueDialogBox() {
             </Label>
             <Input
               id="logo"
-              
+              ref={file}
               className="col-span-3"
               type="file"
               accept="image/*"
-            
+              
               onChange={(e)=>handleInputChange(e)}
             />
           </div>
-          
         </div>
         <DialogFooter>
-          <Button type="submit" disabled={name=="" || imgUrl==""}>Add League</Button>
+          <Button  type="submit" onClick={handleClick} disabled={name=="" || imgUrl==""}>{loading?"Loading":"Add League"}</Button>
         </DialogFooter>
       </DialogContent>
+      
     </Dialog>
+    
+    </form>
   )
 }

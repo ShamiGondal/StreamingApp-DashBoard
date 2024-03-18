@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/custom/Header";
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider, } from '@clerk/nextjs'
+import QueryClientProviderComp from "@/components/custom/QueryClientProvider";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Toaster } from "@/components/ui/toaster"
+
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,17 +23,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
   
-}>) {
+}>)
+  
+{
+ 
+   
   return (
     <ClerkProvider>
 <html lang="en">
       <>
+      
       <body className={inter.className}>
+      <QueryClientProviderComp>
       <Header></Header>
         <main className="relative z-10">
           {children} 
+          
         </main>
+        <Toaster />
+        <ReactQueryDevtools></ReactQueryDevtools>
+        </QueryClientProviderComp>
         </body>
+
+        
+       
       </>
     </html>
     </ClerkProvider>
