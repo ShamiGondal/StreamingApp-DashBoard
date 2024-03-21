@@ -16,22 +16,23 @@ import { SkeletonDemo } from "./SkeltonLeagues";
 
 
 
-type LeagueData = {
+export type SportData = {
+  id:number;
   NAME: string;
   LOGO_URL: string;
 };
 
 const GetLeagues: React.FC = () => {
-  const [leagues, setLeagues] = useState<LeagueData[]>([]);
+  const [sports, setSports] = useState<SportData[]>([]);
 
-  const getLeagues = async (): Promise<LeagueData[] | undefined> => {
+  const getSports = async (): Promise<SportData[] | undefined> => {
     try {
-      const response = await fetch("/api/auth/leagues", {
+      const response = await fetch("/api/auth/sports", {
         method: "GET"
       });
       if (response.ok) {
         const result = await response.json();
-        setLeagues(result.DATA);
+        setSports(result.DATA);
         return result;
       }
       throw new Error("Error in fetching request");
@@ -40,9 +41,9 @@ const GetLeagues: React.FC = () => {
     }
   };
 
-  const { isLoading, isError,isFetching } = useQuery<LeagueData[] | undefined, Error>({
-    queryKey: ["GET_LEAGUES"],
-    queryFn: ()=>getLeagues()
+  const { isLoading, isError,isFetching } = useQuery<SportData[] | undefined, Error>({
+    queryKey: ["GET_Sports"],
+    queryFn: ()=>getSports()
   });
 
   if (isLoading || isFetching) {
@@ -55,18 +56,18 @@ const GetLeagues: React.FC = () => {
   return (
     <div className="mt-12">
      <Table>
-      <TableCaption className="mt-8 font-semibold text-2xl">{leagues.length ?"All Leagues":"NO LEAGUE EXIST"}</TableCaption>
+      <TableCaption className="mt-8 font-semibold text-2xl">{sports.length ?"All SPORTS":"NO SPORT EXIST"}</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="flex-1">LEAGUE NAME</TableHead>
+          <TableHead className="flex-1">SPORT NAME</TableHead>
           <TableHead className="flex-1">LOGO</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {leagues.map((league) => (
-          <TableRow key={league.NAME}>
-            <TableCell className="font-medium">{league.NAME}</TableCell>
-            <TableCell><img className="" width={40} height={40} src={league.LOGO_URL} alt="logo"></img></TableCell>
+        {sports.map((sport) => (
+          <TableRow key={sport.NAME}>
+            <TableCell className="font-medium">{sport.NAME}</TableCell>
+            <TableCell><img className="" width={40} height={40} src={sport.LOGO_URL} alt="logo"></img></TableCell>
             {/* <TableCell>{invoice.paymentMethod}</TableCell>
             <TableCell className="text-right">{invoice.totalAmount}</TableCell> */}
           </TableRow>

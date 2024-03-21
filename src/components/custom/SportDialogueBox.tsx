@@ -1,10 +1,9 @@
 'use client'
 import { Button } from "@/components/ui/button"
 import supabase from "@/config/dbConnection"
-import { useMutation,useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useToast } from "@/components/ui/use-toast"
 import { useQueryClient } from "@tanstack/react-query"
-import { Select } from "../ui/select"
 
 import {
   Dialog,
@@ -18,66 +17,25 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { SportData } from "./GetSports"
 
-import {
-    
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    
-    SelectTrigger,
-    SelectValue,
-  } from "@/components/ui/select"
 
 import { ChangeEvent, useState,useEffect, useRef, } from "react"
 
 
-export function LeagueDialogBox() {
+export function SportDialogBox() {
     const [name,setName] = useState("");
     const client = useQueryClient();
     const [loading,setLoading] = useState(false);
     const [logo,setLogo] = useState<File>(null!);
     const file = useRef<HTMLInputElement>(null!);
     const [imgUrl, setImgUrl] = useState("");
-    const [sportId,setSportId] = useState<number|null>(null);
-
-
-     
-
 
     const { toast } = useToast()
-
-    const [sports, setSports] = useState<SportData[]>([]);
-
     
-
-    const getSports = async (): Promise<SportData[] | undefined> => {
-      try {
-        const response = await fetch("/api/auth/sports", {
-          method: "GET"
-        });
-        if (response.ok) {
-          const result = await response.json();
-          setSports(result.DATA);
-          return result;
-        }
-        throw new Error("Error in fetching request");
-      } catch (e) {
-        console.error(e);
-      }
-    };
-  
-    const {  } = useQuery<SportData[] | undefined, Error>({
-      queryKey: ["GET_Sports - SELECT PANEL"],
-      queryFn: ()=>getSports(),
-      
-    });
-    
-   const postLeague = async(data:{name:string,imgUrl:string,sportId:number|null})=>{
+   const postSport = async(data:{name:string,imgUrl:string})=>{
       try{
         setLoading(true);
-          const res=await fetch('/api/auth/league',{
+          const res=await fetch('/api/auth/sports',{
           method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -91,14 +49,13 @@ export function LeagueDialogBox() {
           })
           setName("")
           setImgUrl("")
-          setSportId(null);
           file.current.value =""
-          client.invalidateQueries({ queryKey: ["GET_Leagues"] })
+          client.invalidateQueries({ queryKey: ["GET_Sports"] })
           
          }
          if(!res.ok){
           toast({
-            description:"Error in Posting"
+            description:"error in Posting"
           })
          }
       }catch(e){
@@ -126,9 +83,6 @@ export function LeagueDialogBox() {
         }
        }catch(e){
         console.log(e);
-        toast({
-            description:(e as Error).message
-        })
        }
        finally{
         setLoading(false)
@@ -143,7 +97,7 @@ export function LeagueDialogBox() {
     },[logo])
     
       const {mutate,isError,error} =  useMutation({
-        mutationFn:postLeague,
+        mutationFn:postSport,
         onError:(error)=>{
           toast({
             description: (error as Error).message,
@@ -158,16 +112,15 @@ export function LeagueDialogBox() {
     }
     const handleClick = (e:any)=>{
       e.preventDefault();
-      if(!name || !imgUrl || !sportId){
+      if(!name || !imgUrl){
         return
       }
-      const data = {name,imgUrl,sportId};
+      const data = {name,imgUrl};
       try{
         mutate(data);
       }
       catch(e){
-       console.error(e)
-
+   
       }
       
     }
@@ -178,23 +131,22 @@ export function LeagueDialogBox() {
     
     
   return (
-   <>
     <form >
     <Dialog >
       <DialogTrigger asChild>
-        <Button variant="outline">Add League</Button>
+        <Button variant="outline">Add Sport</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[495px]">
         <DialogHeader>
-          <DialogTitle>Add League</DialogTitle>
+          <DialogTitle>Add Sport</DialogTitle>
           <DialogDescription>
-            Addition of new League
+            Addition of new Sport
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
-              League Name
+              Sport Name
             </Label>
             <Input
               id="name"
@@ -204,19 +156,7 @@ export function LeagueDialogBox() {
               onChange={(e)=>{setName(e.target.value)}}
             />
           </div>
-         {sports ? ( <div className="select box">
-          <Select onValueChange={(e)=>setSportId(parseInt(e))}>
-      <SelectTrigger className="w-[180px]" >
-        <SelectValue  placeholder="Choose Sports" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          {sports.map((sport)=>(<SelectItem key={sport.id} onClick={()=>{setSportId(sport.id)}} value={`${sport.id}`}>{sport.NAME}</SelectItem>))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-
-          </div>):null}
+          
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="Logo" className="text-right">
               Logo
@@ -233,12 +173,12 @@ export function LeagueDialogBox() {
           </div>
         </div>
         <DialogFooter>
-          <Button  type="submit" onClick={handleClick} disabled={name=="" || imgUrl=="" || !sportId}>{loading?"Loading":"Add League"}</Button>
+          <Button  type="submit" onClick={handleClick} disabled={name=="" || imgUrl==""}>{loading?"Loading":"Add Sport"}</Button>
         </DialogFooter>
       </DialogContent>
       
     </Dialog>
+    
     </form>
-   </>
   )
 }

@@ -9,9 +9,9 @@ const sideBarsArr = [
     {id:1,tab:'Dash',link:"/dashboard/Dash"},
     {id:2,tab:'Games',link:"/dashboard/Game"},
    
-    {id:4,tab:"Users",link:"/dashboard/User"},
+    {id:4,tab:"Leagues",link:"/dashboard/league"},
     {id:5,tab:'Admin',link:"/dashboard/Adm"},
-    {id:6,tab:'Leagues',link:"/dashboard/Leagues"},
+    {id:6,tab:'Sports',link:"/dashboard/sports"},
 ]
 
 export default function SideBar() {

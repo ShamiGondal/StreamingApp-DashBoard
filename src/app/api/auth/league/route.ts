@@ -4,12 +4,13 @@ import supabase from '../../../../config/dbConnection';
 
 export async function POST(request: NextRequest, response: NextResponse) {
   try {
-    const { name, imgUrl } = await request.json();
+    const { name, imgUrl,sportId } = await request.json();
 
     const { data, error } = await supabase.from('LEAGUES').insert([
       {
         NAME: name,
         LOGO_URL: imgUrl,
+        SPORT_ID:sportId
       },
   
     ])
@@ -34,8 +35,8 @@ export async function GET(request: NextRequest, response: NextResponse) {
   try {
     
     const { data, error } = await supabase
-  .from('LEAGUES')
-  .select(`NAME , LOGO_URL`)
+  .from('SPORTS')
+  .select(`id,NAME,LOGO_URL`)
 
   if (error) {
     throw error
