@@ -31,6 +31,13 @@ export function SportDialogBox() {
     const [imgUrl, setImgUrl] = useState("");
 
     const { toast } = useToast()
+
+    const reset = ()=>{
+      setName("");
+      setImgUrl("")
+      file.current.value = null!
+      setLogo(null!);
+    }
     
    const postSport = async(data:{name:string,imgUrl:string})=>{
       try{
@@ -47,25 +54,26 @@ export function SportDialogBox() {
           toast({
             description: data.message,
           })
-          setName("")
-          setImgUrl("")
-          file.current.value =""
-          client.invalidateQueries({ queryKey: ["GET_Sports"] })
+          reset();
+          client.invalidateQueries({ queryKey:  ["GET_Sports"] })
           
          }
          if(!res.ok){
           toast({
-            description:"error in Posting"
+            description: JSON.stringify(await res.json())
           })
          }
+         reset();
       }catch(e){
         toast({
           description: (e as Error).message,
         })
+        reset();
        console.error(e);
       }
       finally{
         setLoading(false);
+        reset();
       }
    }
 
@@ -102,6 +110,7 @@ export function SportDialogBox() {
           toast({
             description: (error as Error).message,
           })
+          reset();
         }
        })
           
@@ -120,13 +129,15 @@ export function SportDialogBox() {
         mutate(data);
       }
       catch(e){
-   
+          console.error(e);
+          reset(); 
       }
       
     }
 
     if(isError){
-      return <p>{error.message}</p>
+      reset();
+      return <p className="text-red-300">{error.message}</p>
     }
     
     
@@ -173,7 +184,7 @@ export function SportDialogBox() {
           </div>
         </div>
         <DialogFooter>
-          <Button  type="submit" onClick={handleClick} disabled={name=="" || imgUrl==""}>{loading?"Loading":"Add Sport"}</Button>
+          <Button  type="submit" onClick={handleClick} disabled={(!imgUrl)||(!name)}>{loading?"Loading":"Add Sport"}</Button>
         </DialogFooter>
       </DialogContent>
       

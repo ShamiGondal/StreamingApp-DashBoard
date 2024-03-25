@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { SportData } from "./GetSports"
+
 
 import {
     
@@ -33,59 +33,33 @@ import {
 import { ChangeEvent, useState,useEffect, useRef, } from "react"
 
 
-export function LeagueDialogBox() {
+type LeagueType = {
+    id:number,
+    NAME:string,
+    LOGO_URL:string
+}
+
+export function TeamDialogueBox() {
     const [name,setName] = useState("");
     const client = useQueryClient();
     const [loading,setLoading] = useState(false);
     const [logo,setLogo] = useState<File>(null!);
     const file = useRef<HTMLInputElement>(null!);
     const [imgUrl, setImgUrl] = useState("");
-    const [sportId,setSportId] = useState<number|null>(null);
-
-
+    const [leagueId,setLeagueId] = useState<number|null>(null);
+    
      
 
 
     const { toast } = useToast()
 
-    const [sports, setSports] = useState<SportData[]>([]);
-
     
-  
-   const reset = ()=>{
-          setName("")
-          setImgUrl("")
-          setSportId(null);
-          file.current.value =""
-          setLogo(null!)
-   }
+    const [leagues,setLeagues] = useState([] as LeagueType[])
 
-    const getSports = async (): Promise<SportData[] | undefined> => {
-      try {
-        const response = await fetch("/api/auth/sports", {
-          method: "GET"
-        });
-        if (response.ok) {
-          const result = await response.json();
-          setSports(result.DATA);
-          return result;
-        }
-        throw new Error("Error in fetching request");
-      } catch (e) {
-        console.error(e);
-      }
-    };
-  
-    const {  } = useQuery<SportData[] | undefined, Error>({
-      queryKey: ["GET_Sports - SELECT PANEL"],
-      queryFn: ()=>getSports(),
-      
-    });
-    
-   const postLeague = async(data:{name:string,imgUrl:string,sportId:number|null})=>{
+    const postTeam = async(data:{name:string,imgUrl:string,leagueId:number|null})=>{
       try{
         setLoading(true);
-          const res=await fetch('/api/auth/league',{
+          const res=await fetch('/api/auth/team',{
           method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -98,27 +72,63 @@ export function LeagueDialogBox() {
             description: data.message,
           })
           reset();
-          
-          client.invalidateQueries({ queryKey: ["GET_LEAGUES"] })
+          client.invalidateQueries({ queryKey:["GET_TEAMS"] })
           
          }
          if(!res.ok){
           toast({
             description: JSON.stringify(await res.json())
           })
-          reset();
          }
+         reset();
       }catch(e){
         toast({
           description: (e as Error).message,
         })
-        reset()
+        reset();
        console.error(e);
       }
       finally{
         setLoading(false);
+        reset();
       }
    }
+
+    
+
+    const GetAllLeagues = async (): Promise<LeagueType[] | undefined> => {
+        try {
+          const response = await fetch("/api/auth/league", {
+            method: "GET"
+          });
+          if (response.ok) {
+            const result = await response.json();
+             setLeagues(result.DATA);
+            return result;
+          }
+          throw new Error("Error in fetching request");
+        } catch (e) {
+          console.error(e);
+        }
+      };
+      const { isLoading, isError,isFetching } = useQuery<LeagueType[] | undefined, Error>({
+        queryKey: ["GET_LEAGUES - SELECT"],
+        queryFn: ()=>GetAllLeagues()
+      });
+
+    
+  
+   const reset = ()=>{
+          setName("")
+          setImgUrl("")
+          setLeagueId(null);
+          file.current.value =""
+          setLogo(null!)
+   }
+
+   
+    
+   
 
     const uploadImg = async()=>{
        try{
@@ -150,15 +160,7 @@ export function LeagueDialogBox() {
       }
     },[logo])
     
-      const {mutate,isError,error} =  useMutation({
-        mutationFn:postLeague,
-        onError:(error)=>{
-          toast({
-            description: (error as Error).message,
-          })
-          reset();
-        }
-       })
+      
           
     const handleInputChange = (e:ChangeEvent<HTMLInputElement>)=>{
       if(e.target.files && e.target?.files?.[0]?.size < (1024 * 1024)){
@@ -167,12 +169,13 @@ export function LeagueDialogBox() {
     }
     const handleClick = (e:any)=>{
       e.preventDefault();
-      if(!name || !imgUrl || !sportId){
+      if(!name || !imgUrl || !leagueId){
         return
       }
-      const data = {name,imgUrl,sportId};
+      const data = {name,imgUrl,leagueId};
       try{
-        mutate(data);
+        console.log(data);
+       mutate(data);
       }
       catch(e){
        console.error(e)
@@ -181,9 +184,11 @@ export function LeagueDialogBox() {
       
     }
 
-    if(isError){
-      return <p>{error.message}</p>
-    }
+     const {mutate } =  useMutation({
+      mutationFn:postTeam
+     })
+
+
     
     
   return (
@@ -191,19 +196,19 @@ export function LeagueDialogBox() {
     <form >
     <Dialog >
       <DialogTrigger asChild>
-        <Button variant="outline">Add League</Button>
+        <Button variant="outline">Add Team</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[495px]">
         <DialogHeader>
-          <DialogTitle>Add League</DialogTitle>
+          <DialogTitle>Add Team</DialogTitle>
           <DialogDescription>
-            Addition of new League
+            Addition of new Team
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
-              League Name
+              Team Name
             </Label>
             <Input
               id="name"
@@ -213,19 +218,25 @@ export function LeagueDialogBox() {
               onChange={(e)=>{setName(e.target.value)}}
             />
           </div>
-         {sports ? ( <div className="select box">
-          <Select onValueChange={(e)=>setSportId(parseInt(e))}>
+          <div className="flex justify-between items-center flex-wrap gap-2">
+          
+          
+          {leagues ? ( <div className="select box">
+          <Select onValueChange={(e)=>setLeagueId(parseInt(e))}>
       <SelectTrigger className="w-[180px]" >
-        <SelectValue  placeholder="Choose Sports" />
+        <SelectValue  placeholder="Choose League" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {sports.map((sport)=>(<SelectItem key={sport.id} onClick={()=>{setSportId(sport.id)}} value={`${sport.id}`}>{sport.NAME}</SelectItem>))}
+          {leagues.map((league)=>(<SelectItem key={league.id} onClick={()=>{setLeagueId(league.id)}} value={`${league.id}`}>{league.NAME}</SelectItem>))}
         </SelectGroup>
       </SelectContent>
     </Select>
 
           </div>):null}
+
+          </div>
+        
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="Logo" className="text-right">
               Logo
@@ -242,7 +253,7 @@ export function LeagueDialogBox() {
           </div>
         </div>
         <DialogFooter>
-          <Button  type="submit" onClick={handleClick} disabled={(!imgUrl)||(!name)||(!sportId)}>{loading?"Loading":"Add League"}</Button>
+          <Button  type="submit" onClick={handleClick} disabled={(!imgUrl)||(!name)||(!leagueId)}>{loading?"Loading":"Add Team"}</Button>
         </DialogFooter>
       </DialogContent>
       

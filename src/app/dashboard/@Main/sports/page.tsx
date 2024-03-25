@@ -2,7 +2,6 @@ import { SportDialogBox } from "@/components/custom/SportDialogueBox"
 import GETSPORTS from "@/components/custom/GetSports"
 
 
-
 const page = () => {
   return (
     <section className="leaguePage px-3 py-6 w-full">

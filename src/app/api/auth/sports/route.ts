@@ -8,7 +8,7 @@ export async function POST(request: NextRequest, response: NextResponse) {
 
     const { data, error } = await supabase.from('SPORTS').insert([
       {
-        NAME: name,
+        NAME: name.toUpperCase(),
         LOGO_URL: imgUrl,
       },
   

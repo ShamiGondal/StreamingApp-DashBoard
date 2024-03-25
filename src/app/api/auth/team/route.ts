@@ -4,13 +4,13 @@ import supabase from '../../../../config/dbConnection';
 
 export async function POST(request: NextRequest, response: NextResponse) {
   try {
-    const { name, imgUrl,sportId } = await request.json();
+    const { name, imgUrl,leagueId } = await request.json();
 
-    const { data, error } = await supabase.from('LEAGUES').insert([
+    const { data, error } = await supabase.from('TEAMS').insert([
       {
         NAME:  name.toUpperCase(),
         LOGO_URL: imgUrl,
-        SPORT_ID:sportId
+        LEAGUE_ID:leagueId
       },
   
     ])
@@ -30,35 +30,31 @@ export async function POST(request: NextRequest, response: NextResponse) {
     });
   }
 }
-
-export const fetchData = async(sportId:string|null)=>{
-if(sportId){
-   return await supabase
-  .from('LEAGUES')
-  .select(`id,NAME,LOGO_URL`)
-  .eq("SPORT_ID",parseInt(sportId));
-}
-else{
-  return await supabase
-  .from('LEAGUES')
-  .select(`id,NAME,LOGO_URL`)
- 
-}
-}
+export const fetchData = async(leagueId:string|null)=>{
+  if(leagueId){
+     return await supabase
+     .from('TEAMS')
+     .select(`id,NAME,LOGO_URL`)
+     .eq("LEAGUE_ID",parseInt(leagueId));
+  }
+  else{
+    return await supabase
+    .from('TEAMS')
+    .select(`id,NAME,LOGO_URL`)
+   
+  }
+  }
 
 export async function GET(request: NextRequest, response: NextResponse) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const sportId = searchParams.get('sportId')
-  
-  const { data, error } = await fetchData(sportId);
-  
-
+    const leagueId = searchParams.get('leagueId')
+    const { data, error } = await fetchData(leagueId);
   if (error) {
     throw error
   }     
   
-    return new NextResponse(JSON.stringify({ "DATA":data }), {
+    return new NextResponse(JSON.stringify({"DATA":data }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

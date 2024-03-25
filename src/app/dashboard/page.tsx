@@ -3,7 +3,7 @@
 const DashBoardFooterPage = () => {
    
   return (
-    <div className="bg-red-200">
+    <div className="bg-gray-600 text-white flex justify-center items-center p-4">
      DashBoard Footer
     </div>
   )
