@@ -45,13 +45,6 @@ const AddGame = () => {
     const [showBtn,setShowBtn] = useState(false);
     const venue = useRef<HTMLInputElement>(null!)
     const [value,setValue]= useState("");
-
-
-    
-
-  
-
-    
     
 useEffect(()=>{
    

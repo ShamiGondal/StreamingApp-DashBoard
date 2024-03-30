@@ -13,10 +13,6 @@ else{
 }
 }
 
-
-
- 
-
 export default authMiddleware({
 
   
