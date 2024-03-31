@@ -24,13 +24,12 @@ const addTeamsToGAME = async(gameId:string,teamId:string)=>{
 
 const fetchTeams = async(gameId:string)=>{
   try{
-      const {data,error} =   await supabase.from("TEAMS_GAMES").select("TEAMS (id,NAME)").eq("GAME_ID",gameId);
+      const {data,error} =   await supabase.from("TEAMS_GAMES").select("id,GAME_ID,TEAMS(NAME)").eq("GAME_ID",gameId)
         if(data){
-          console.log(data);
          return data
         }
         if(error){
-          console.error("er "+error);
+          console.error("er : "+error);
         }
 
   }catch(e){
@@ -82,15 +81,15 @@ export async function GET(request: NextRequest, response: NextResponse) {
     
     const { data, error } = await supabase
   .from('GAMES')
-  .select(`id,Venue, SPORTS (id,NAME),LEAGUES(id,NAME)`)
+  .select(`id,Venue,isLive,SPORTS (NAME),LEAGUES(NAME)`)
+  
   
   if(data){
-   const gamesId = data.map(async(game)=> await fetchTeams(game.id));
-   
-     
+  const ids = data.map((item)=>item.id);
+  const res= await Promise.all(ids.map(async(id)=> {return await fetchTeams(id) }))
+  const teams = await Promise.all(res);
+  return new NextResponse(JSON.stringify({"games":{data,teams}}));
   }
-  
-  
 
   if (error) {
     throw error
@@ -100,6 +99,35 @@ export async function GET(request: NextRequest, response: NextResponse) {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
+  } catch (e) {
+    return new NextResponse(JSON.stringify({"message":(e as Error).message ,"error":e as Error}), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+export async function PATCH(request: NextRequest, response: NextResponse) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const gameId = searchParams.get('gameId')
+    const toggle = searchParams.get("toggle");
+    console.log("game id "+parseInt(gameId!));
+    console.log("toggle "+toggle);
+  if(gameId && toggle){
+    const {data,error} = await supabase.from("GAMES").update({"isLive":toggle}).eq("id",gameId).select();
+  if(data)
+    return new NextResponse(JSON.stringify({ message:"updated" }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  
+  
+   return new NextResponse(JSON.stringify({"message":"error in updation"}),{
+    status: 403,
+    headers: { 'Content-Type': 'application/json' },
+  })
   } catch (e) {
     return new NextResponse(JSON.stringify({"message":(e as Error).message ,"error":e as Error}), {
       status: 500,
