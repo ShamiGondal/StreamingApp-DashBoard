@@ -32,10 +32,11 @@ const FormSchema = z.object({
 })
 
 type CalendarFormType = {
+  date:Date | undefined,
   setDate :  React.Dispatch<React.SetStateAction<Date | undefined>>
 }
 
-export default function CalendarForm({setDate}:CalendarFormType) {
+export default function CalendarForm({date,setDate}:CalendarFormType) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   })
@@ -63,7 +64,7 @@ export default function CalendarForm({setDate}:CalendarFormType) {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pick a Match date</span>
+                        <span>{date?<p>{date.toLocaleDateString()}</p>:<p>Pick up a Match date</p>}</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -72,9 +73,9 @@ export default function CalendarForm({setDate}:CalendarFormType) {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
+                     
                     selected={field.value}
                     onSelect={(e)=>setDate(e)}
-                   
                     initialFocus
                   />
                 </PopoverContent>

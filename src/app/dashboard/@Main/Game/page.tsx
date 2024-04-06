@@ -1,4 +1,6 @@
 import AddGame from "@/components/custom/AddGame"
+// import GetTeams from "@/components/custom/GetTeams"
+import GetGames from "@/components/custom/GetGames"
 const page = () => {
   return (
     <section className="leaguePage px-3 py-6 w-full">
@@ -6,6 +8,7 @@ const page = () => {
      <h4 className="title font-semibold text-2xl md:text-3xl ">GAME</h4>
       <AddGame></AddGame>
      </div>
+     <GetGames></GetGames>
     </section>
   )
 }
