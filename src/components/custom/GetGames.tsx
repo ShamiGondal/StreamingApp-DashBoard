@@ -1,5 +1,39 @@
 'use client'
 
+import { ToggleLeft, ToggleRight } from 'lucide-react';
+import { Cog } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+type lST = {
+  NAME:string
+}
+
+type game = {
+  id:number,
+  isLive:boolean,
+  Venue:string,
+  SPORTS:lST,
+  LEAGUES:lST
+}
+type team = {
+  id:number
+  GAME_ID:number
+  TEAMS:lST
+}
+
+type teamProp = team[]
+
+type gamesDataProps = {
+  games:{
+    data: game[],
+    teams:teamProp[]
+  }
+}
+
 import { useState } from "react"
 
 import { useQuery } from "@tanstack/react-query";
@@ -15,14 +49,31 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SkeletonDemo } from "./SkeltonLeagues";
-export type GameType = {
-    id:number,
-    NAME:string,
-    LOGO_URL:string
-}
-const GetGames = () => {
-    const [teams,setTeams] = useState([] as any)
 
+const GetGames = () => {
+    const [teams,setTeams] = useState<teamProp[]>([] as teamProp[])
+    const [allGames,setAllGames] = useState<game[]>([] as game[])  
+
+    
+   const makeGameLive = async(gameId:number,toggle:boolean)=>{
+     
+    try{
+     const res = await fetch(`/api/auth/games?gameId=${gameId}&toggle=${toggle}`,{
+      method:"PATCH",
+     })
+     if(res.ok){
+      refetch();
+     }
+    }catch(e){
+      console.error(e);
+    }
+   }
+
+
+   const renderTeams = (teamArr:teamProp)=>{
+    return teamArr.map(t=><TableCell key={t.id}>{t.TEAMS.NAME}</TableCell>)
+   }
+   
     
     const GetAllGames = async (): Promise<any | undefined> => {
       try {
@@ -30,9 +81,9 @@ const GetGames = () => {
           method: "GET"
         });
         if (response.ok) {
-          const result = await response.json();
-          console.log(result);
-          setTeams(result.DATA);
+          const result:gamesDataProps = await response.json();
+          setAllGames(result.games.data);
+          setTeams(result.games.teams); 
           return result;
         }
         throw new Error("Error in fetching request");
@@ -40,8 +91,8 @@ const GetGames = () => {
         console.error(e);
       }
     };
-    const { isLoading, isError,isFetching } = useQuery <any | undefined, Error>({
-      queryKey: ["GET_TEAMS"],
+    const { isLoading, isError,isFetching,refetch } = useQuery <any | undefined, Error>({
+      queryKey: ["GET_GAMES"],
       queryFn: ()=>GetAllGames()
     });
   
@@ -57,25 +108,38 @@ const GetGames = () => {
     <div>
         
         <div className="mt-12">
-     {/* <Table>
-      <TableCaption className="mt-8 font-semibold text-2xl">{teams.length ?"All Teams":"No Team EXIST"}</TableCaption>
+     <Table>
+      <TableCaption className="mt-8 font-semibold text-2xl">{teams.length ?"All GAMES":"No GAME EXIST"}</TableCaption>
       <TableHeader>
         <TableRow>
+          <TableHead className="flex-1">SPORT NAME</TableHead>
           <TableHead className="flex-1">LEAGUE NAME</TableHead>
-          <TableHead className="flex-1">LOGO</TableHead>
+          <TableHead className="flex-1">MATCH VENUE</TableHead>
+          <TableHead className="flex-1">TEAM 1</TableHead>
+          <TableHead className="flex-1">TEAM 2</TableHead>
+          <TableHead> Settings</TableHead>
+          
         </TableRow>
       </TableHeader>
       <TableBody>
-        {teams.map((team:any) => (
-          <TableRow key={team.id}>
-            <TableCell className="font-medium">{team.NAME}</TableCell>
-            <TableCell><img className="" width={40} height={40} src={team.LOGO_URL} alt="logo"></img></TableCell>
-            
+        {allGames.map((game) => (
+          <TableRow key={game.id} className={game.isLive ?"bg-slate-500":""}>
+            <TableCell className="font-medium">{game.SPORTS.NAME}</TableCell>
+            <TableCell className="font-medium">{game.LEAGUES.NAME}</TableCell>
+            <TableCell className="font-medium">{game.Venue}</TableCell>
+           {teams.map((teamArr)=>{return renderTeams(teamArr.filter((t)=>t.GAME_ID===game.id))})}  
+         { <Popover>
+          <TableCell className='font-medium' ><PopoverTrigger asChild><Cog className='cursor-pointer'></Cog></PopoverTrigger>
+           <PopoverContent><div className='btns'>
+            <div title='live status' className='cursor-pointer'>{game.isLive?<ToggleRight onClick={()=>makeGameLive(game.id,false)}></ToggleRight>:<ToggleLeft onClick={()=>{makeGameLive(game.id,true)}}></ToggleLeft>}</div>
+            </div></PopoverContent>
+           </TableCell>
+          </Popover>}
           </TableRow>
         ))}
       </TableBody>
       
-    </Table> */}
+    </Table>
     </div>
     </div>
   )
