@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import supabase from '../../../../config/dbConnection';
 
-export async function POST(request: NextRequest, response: NextResponse) {
+export async function post(request: NextRequest, response: NextResponse) {
   try {
     const { name, imgUrl } = await request.json();
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, response: NextResponse) {
   }
 }
 
-export async function GET(request: NextRequest, response: NextResponse) {
+export async function get(request: NextRequest, response: NextResponse) {
   try {
     
     const { data, error } = await supabase
