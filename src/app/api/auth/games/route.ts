@@ -38,7 +38,7 @@ const fetchTeams = async(gameId:string)=>{
   }
 }
 
-export async function post(request: NextRequest, response: NextResponse) {
+export async function POST(request: NextRequest, response: NextResponse) {
   try {
     const { sportId,leagueId,teamId1,teamId2,date,links,venue} = await request.json();
 
