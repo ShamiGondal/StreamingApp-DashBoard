@@ -45,7 +45,7 @@ export const fetchData = async(leagueId:string|null)=>{
   }
   }
 
-export async function get(request: NextRequest, response: NextResponse) {
+export async function GET(request: NextRequest, response: NextResponse) {
   try {
     const searchParams = request.nextUrl.searchParams
     const leagueId = searchParams.get('leagueId')

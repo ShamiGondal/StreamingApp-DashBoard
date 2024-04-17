@@ -46,7 +46,7 @@ else{
 }
 }
 
-export async function get(request: NextRequest, response: NextResponse) {
+export async function GET(request: NextRequest, response: NextResponse) {
   try {
     const searchParams = request.nextUrl.searchParams
     const sportId = searchParams.get('sportId')
